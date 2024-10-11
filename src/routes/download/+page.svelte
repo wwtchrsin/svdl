@@ -1,13 +1,20 @@
 <script lang="ts">
-  import { PUBLIC_APP_NAME } from "$env/static/public"
+  import { PUBLIC_APP_NAME, PUBLIC_SERVER_ADDR } from "$env/static/public"
   import Header from "$lib/components/Header.svelte"
-  import { getVideoUrl, getFileName } from "$lib/utils"
+  import { checkVideoStatus, sleep, getFileName } from "$lib/utils"
   import { onMount } from "svelte";
   import type { PageData } from "./$types"
 
   export let data: PageData
   let url: string | undefined
   let status: "error" | "loading" | "loaded" | "init" = "init"
+  let message = ""
+  const statusText = {
+    "error": "Error!",
+    "loading": "Loading...",
+    "loaded": "Done.",
+    "init": "..."
+  }
 
   onMount(async () => {
     if ( !data.uid ) {
@@ -15,12 +22,21 @@
       return
     }
     status = "loading"
-    try {
-      url = await getVideoUrl(data.uid)
-      status = url ? "loaded" : "error"
-    } catch (err) {
-      status = "error"
+    for ( let i=0; 1 < 1000; i += 2 ) { 
+      const response = await checkVideoStatus(data.uid)
+      if ( response.error ) {
+        status = "error"
+        return
+      }
+      message = response.message ?? ""
+      if ( response.url ) {
+        url = `${PUBLIC_SERVER_ADDR}/${response.url}`
+        status = "loaded"
+        return
+      }
+      await sleep(2000)
     }
+    status = "error"
   })
 </script>
 
@@ -30,21 +46,18 @@
   <div class="container">
     <Header></Header>
     <div class="status" class:error={status === "error"} class:init={status === "init"}>
-      {#if status === "loading"}
-        <div class="status-label">status:</div>
-        <div class="status-value">Loading...</div>
-      {:else if status === "error"}
-        <div class="status-label">status:</div>
-        <div class="status-value">Error!</div>
-      {:else if status === "loaded"}
-        <div class="status-label">link</div>
-        <div class="status-value">
-          <a href={url} class="video-link">{getFileName(url)}</a>
+      <div class="status-label">status:</div>
+      <div class="status-value">{statusText[status]}</div>
+    </div>
+    <div class="message" class:loading={status === "loading" && message} 
+      class:loaded={status === "loaded"}>
+        <div>
+          {#if status === "loading"}
+            {message}
+          {:else if status === "loaded"}
+            <a href={url} class="video-link">{getFileName(url)}</a>
+          {/if}
         </div>
-      {:else}
-        <div class="status-label">status:</div>
-        <div class="status-value">---</div>
-      {/if}
     </div>
   </div>
 </div>
@@ -91,6 +104,22 @@
   }
   .status-value {
     background-color: rgba(254, 254, 254, 0.4);
+  }
+  .message {
+    visibility: hidden;
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    height: 4.6rem;
+    background-color: var(--blue-color);
+    color: var(--white-color);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    overflow: hidden;
+  }
+  .message.loading,
+  .message.loaded {
+    visibility: visible;
   }
   .video-link {
     color: var(--white-color);

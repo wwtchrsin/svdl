@@ -22,40 +22,34 @@ export const getVideoId = async (url: string) => {
 export const checkVideoStatus = async (uid: string) => {
   const response = await fetch(`${PUBLIC_SERVER_ADDR}/video/${uid}`)
   if ( !response.ok || response.status > 299 ) {
-    return { error: true, url: undefined }
+    return {
+      error: true,
+      url: undefined,
+      message: undefined,
+    }
   }
   try {
     const responseData = await response.json()
-    return { error: !!responseData.error, url: responseData.url }
+    return {
+      error: !!responseData.error,
+      url: responseData.url,
+      message: responseData.message,
+    }
   } catch (err) {}
-  return { error: true, url: undefined }
+  return {
+    error: true,
+    url: undefined,
+    message: undefined,
+  }
 }
 
-const sleep = async (ms: number) => {
+export const sleep = async (ms: number) => {
   return new Promise((res, rej) => {
     setTimeout(() => res(true), ms)
   })
 }
 
-export const getVideoUrl = async (uid: string | null | undefined) => {
-  if ( !uid ) {
-    throw new Error()
-  }
-  for ( let i=0; 1 < 1000; i += 2 ) { 
-    const status = await checkVideoStatus(uid)
-    if ( status.error ) {
-      throw new Error()
-    }
-    if ( status.url ) {
-      return `${PUBLIC_SERVER_ADDR}/${status.url}`
-    }
-    await sleep(2000)
-  }
-  throw new Error()
-}
-
-export const encodeUrl = (url: string) => 
-  (new TextEncoder()).encode(url).join("F")
+export const encodeUrl = (url: string) => (new TextEncoder()).encode(url).join("F")
 
 export const decodeUrl = (url: string) => {
   const charArray = new Uint8Array(url.split("F").map(v => +v))
