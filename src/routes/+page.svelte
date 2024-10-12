@@ -36,9 +36,9 @@
   .controls {
     display: grid;
     grid-template-columns: auto 100px;
-    gap: 8px;
     margin: 12px 0;
     width: 100%;
+    gap: 8px;
   }
   .src-url {
     padding: 6px;
@@ -59,5 +59,26 @@
     font-size: inherit;
     color: inherit;
     text-decoration: none;
+  }
+  @media (max-width: 600px) {
+    .container {
+      width: 300px;
+    }
+    .controls {
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr 1fr;
+      border-radius: 6px;
+      overflow: hidden;
+      gap: 0;
+    }
+    .button-download {
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+    }
+    .src-url {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      font-size: 0.8rem;
+    }
   }
 </style>

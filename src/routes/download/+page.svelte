@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { PUBLIC_APP_NAME, PUBLIC_SERVER_ADDR } from "$env/static/public"
+  import { PUBLIC_APP_NAME, PUBLIC_FILE_SERVER } from "$env/static/public"
   import Header from "$lib/components/Header.svelte"
   import { checkVideoStatus, sleep, getFileName } from "$lib/utils"
   import { onMount } from "svelte";
@@ -30,7 +30,7 @@
       }
       message = response.message ?? ""
       if ( response.url ) {
-        url = `${PUBLIC_SERVER_ADDR}/${response.url}`
+        url = `${PUBLIC_FILE_SERVER}/${response.url}`
         status = "loaded"
         return
       }
@@ -45,19 +45,23 @@
 <div class="main-container">
   <div class="container">
     <Header></Header>
-    <div class="status" class:error={status === "error"} class:init={status === "init"}>
-      <div class="status-label">status:</div>
-      <div class="status-value">{statusText[status]}</div>
-    </div>
-    <div class="message" class:loading={status === "loading" && message} 
-      class:loaded={status === "loaded"}>
-        <div>
-          {#if status === "loading"}
-            {message}
-          {:else if status === "loaded"}
-            <a href={url} class="video-link">{getFileName(url)}</a>
-          {/if}
+    <div class="content">
+      {#if status === "loading" && message || status === "loaded"}
+        <div class="message">
+          <div>
+            {#if status === "loading"}
+              {message}
+            {:else if status === "loaded"}
+              <a href={url} class="video-link">{getFileName(url)}</a>
+            {/if}
+          </div>
         </div>
+      {:else if status !== "init"}
+        <div class="status" class:error={status === "error"}>
+          <div class="status-label">status:</div>
+          <div class="status-value">{statusText[status]}</div>
+        </div>
+      {/if}
     </div>
   </div>
 </div>
@@ -73,18 +77,19 @@
   .container {
     width: 480px;
   }
+  .content {
+    height: 4.6rem;
+    margin: 12px 0;
+  }
   .status {
     display: grid;
     grid-template-columns: 1fr 2fr;
-    margin: 6px 0;
     background-color: var(--green-color);
     color: var(--white-color);
     text-align: center;
     font-size: 1rem;
     border-radius: 6px;
-  }
-  .status.init {
-    visibility: hidden;
+    height: 100%;
   }
   .status.error {
     background-color: var(--red-color);
@@ -97,7 +102,7 @@
     padding: 12px 0;
     box-sizing: border-box;
     overflow: hidden;
-    height: 120px;
+    height: 100%;
   }
   .status-label {
     background-color: rgba(254, 254, 254, 0.2);
@@ -106,22 +111,25 @@
     background-color: rgba(254, 254, 254, 0.4);
   }
   .message {
-    visibility: hidden;
+    padding: 12px;
+    box-sizing: border-box;
     display: grid;
     justify-content: center;
     align-items: center;
-    height: 4.6rem;
+    height: 100%;
     background-color: var(--blue-color);
     color: var(--white-color);
     border-radius: 6px;
     font-size: 0.8rem;
     overflow: hidden;
-  }
-  .message.loading,
-  .message.loaded {
-    visibility: visible;
+    text-align: center;
   }
   .video-link {
     color: var(--white-color);
+  }
+  @media (max-width: 600px) {
+    .container {
+      width: 300px;
+    }
   }
 </style>

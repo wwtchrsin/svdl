@@ -1,4 +1,4 @@
-import { PUBLIC_SERVER_ADDR } from "$env/static/public"
+import { PUBLIC_BACKEND_SERVER } from "$env/static/public"
 
 export const getVideoId = async (url: string) => {
   const request = {
@@ -6,7 +6,7 @@ export const getVideoId = async (url: string) => {
     body: JSON.stringify({ url }),
     headers: { "Content-Type": "application/json" },
   }
-  const response = await fetch(`${PUBLIC_SERVER_ADDR}/url`, request)
+  const response = await fetch(`${PUBLIC_BACKEND_SERVER}/url`, request)
   if ( !response.ok || response.status > 299 ) {
     return undefined
   }
@@ -20,7 +20,7 @@ export const getVideoId = async (url: string) => {
 }
 
 export const checkVideoStatus = async (uid: string) => {
-  const response = await fetch(`${PUBLIC_SERVER_ADDR}/video/${uid}`)
+  const response = await fetch(`${PUBLIC_BACKEND_SERVER}/video/${uid}`)
   if ( !response.ok || response.status > 299 ) {
     return {
       error: true,

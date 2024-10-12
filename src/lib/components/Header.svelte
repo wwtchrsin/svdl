@@ -6,16 +6,24 @@
 
 <style>
   .header {
-    padding: 16px;
+    display: grid;
+    justify-content: center;
+    align-items: center;
     background-color: var(--green-color);
-    font-size: 2em;
+    font-size: 2rem;
     border-radius: 6px;
     width: 100%;
     box-sizing: border-box;
     text-align: center;
+    height: 4.6rem;
   }
   .header-link {
     color: var(--white-color);
     text-decoration: none;
+  }
+  @media (max-width: 600px) {
+    .header {
+      font-size: 1.2rem;
+    }
   }
 </style>
