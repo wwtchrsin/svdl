@@ -9,10 +9,10 @@ html, body {
   --red-color: rgb(220, 80, 40);
   --green-color: rgb(40, 120, 80);
   --blue-color: rgb(40, 120, 160);
-  --white-color: rgb(254, 254, 254);
-  --light-green-color: rgb(200, 250, 220);
+  --white-color: rgb(240, 240, 240);
+  --dark-green-color: rgb(20, 80, 40);
 }
 
 body {
-  background-color: var(--light-green-color)
+  background-color: var(--dark-green-color)
 }

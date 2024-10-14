@@ -1,12 +1,12 @@
 <script lang="ts">
   import { PUBLIC_APP_NAME, PUBLIC_FILE_SERVER } from "$env/static/public"
   import Header from "$lib/components/Header.svelte"
-  import { checkVideoStatus, sleep, getFileName } from "$lib/utils"
+  import { checkVideoStatus, sleep, getFileName, getVideoId, decodeUrl, truncString } 
+    from "$lib/utils"
   import { onMount } from "svelte";
-  import type { PageData } from "./$types"
+  import { page } from "$app/stores";
 
-  export let data: PageData
-  let url: string | undefined
+  let url: string = ""
   let status: "error" | "loading" | "loaded" | "init" = "init"
   let message = ""
   const statusText = {
@@ -17,25 +17,38 @@
   }
 
   onMount(async () => {
-    if ( !data.uid ) {
+    const encodedUrl = $page.params.url
+    let quality = $page.params.quality
+    if ( !["high", "medium", "low"].includes(quality) ) {
+      quality = "medium"
+    }
+    if ( !encodedUrl ) {
       status = "error"
       return
     }
-    status = "loading"
-    for ( let i=0; 1 < 1000; i += 2 ) { 
-      const response = await checkVideoStatus(data.uid)
-      if ( response.error ) {
+    try {
+      const decodedUrl = decodeUrl(encodedUrl)
+      const uid = await getVideoId(decodedUrl, quality as "high" | "medium" | "low")
+      if ( !uid ) {
         status = "error"
         return
       }
-      message = response.message ?? ""
-      if ( response.url ) {
-        url = `${PUBLIC_FILE_SERVER}/${response.url}`
-        status = "loaded"
-        return
+      status = "loading"
+      for ( let i=0; 1 < 1000; i += 2 ) { 
+        const response = await checkVideoStatus(uid)
+        if ( response.error ) {
+          status = "error"
+          return
+        }
+        message = response.message ?? ""
+        if ( response.url ) {
+          url = `${PUBLIC_FILE_SERVER}/${response.url}`
+          status = "loaded"
+          return
+        }
+        await sleep(2000)
       }
-      await sleep(2000)
-    }
+    } catch (err) {}
     status = "error"
   })
 </script>
@@ -50,13 +63,17 @@
         <div class="message">
           <div>
             {#if status === "loading"}
-              {message}
+              <span class="inline-landscape">{truncString(message, 120)}</span>
+              <span class="inline-portrait">{truncString(message, 60)}</span>
             {:else if status === "loaded"}
-              <a href={url} class="video-link">{getFileName(url)}</a>
+              <a href={url} class="video-link">
+                <span class="inline-landscape">{truncString(getFileName(url), 120)}</span>
+                <span class="inline-portrait">{truncString(getFileName(url), 60)}</span>
+              </a>
             {/if}
           </div>
         </div>
-      {:else if status !== "init"}
+      {:else}
         <div class="status" class:error={status === "error"}>
           <div class="status-label">status:</div>
           <div class="status-value">{statusText[status]}</div>
@@ -76,10 +93,12 @@
   }
   .container {
     width: 480px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 2px solid var(--white-color);
   }
   .content {
     height: 4.6rem;
-    margin: 12px 0;
   }
   .status {
     display: grid;
@@ -88,7 +107,6 @@
     color: var(--white-color);
     text-align: center;
     font-size: 1rem;
-    border-radius: 6px;
     height: 100%;
   }
   .status.error {
@@ -124,12 +142,25 @@
     overflow: hidden;
     text-align: center;
   }
+  .message > div {
+    max-width: 100%;
+    word-break: break-all;
+  }
   .video-link {
     color: var(--white-color);
+  }
+  .inline-portrait {
+    display: none;
   }
   @media (max-width: 600px) {
     .container {
       width: 300px;
+    }
+    .inline-landscape {
+      display: none;
+    }
+    .inline-portrait {
+      display: inline;
     }
   }
 </style>

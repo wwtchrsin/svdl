@@ -11,7 +11,6 @@
     align-items: center;
     background-color: var(--green-color);
     font-size: 2rem;
-    border-radius: 6px;
     width: 100%;
     box-sizing: border-box;
     text-align: center;

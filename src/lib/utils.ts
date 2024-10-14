@@ -1,9 +1,9 @@
 import { PUBLIC_BACKEND_SERVER } from "$env/static/public"
 
-export const getVideoId = async (url: string) => {
+export const getVideoId = async (url: string, quality: "high" | "medium" | "low") => {
   const request = {
     method: "POST",
-    body: JSON.stringify({ url }),
+    body: JSON.stringify({ url, quality }),
     headers: { "Content-Type": "application/json" },
   }
   const response = await fetch(`${PUBLIC_BACKEND_SERVER}/url`, request)
@@ -20,7 +20,8 @@ export const getVideoId = async (url: string) => {
 }
 
 export const checkVideoStatus = async (uid: string) => {
-  const response = await fetch(`${PUBLIC_BACKEND_SERVER}/video/${uid}`)
+  const timestamp = (new Date()).valueOf()
+  const response = await fetch(`${PUBLIC_BACKEND_SERVER}/video/${uid}?timestamp=${timestamp}`)
   if ( !response.ok || response.status > 299 ) {
     return {
       error: true,
@@ -61,4 +62,11 @@ export const decodeUrl = (url: string) => {
   return (new TextDecoder()).decode(charArray)
 }
 
-export const getFileName = (url: string | undefined) => url?.split("/").at(-1)
+export const getFileName = (url: string) => url.split("/").at(-1) ?? "<empty>"
+
+export const truncString = (str: string, maxlen: number) => {
+  if ( str.length <= maxlen ) {
+    return str
+  }
+  return str.substring(0, maxlen - 3) + "..."
+}
