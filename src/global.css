@@ -8,9 +8,10 @@ html, body {
 :root {
   --red-color: rgb(220, 80, 40);
   --green-color: rgb(40, 120, 80);
-  --blue-color: rgb(40, 120, 160);
+  --blue-color: rgb(70, 130, 160);
   --white-color: rgb(240, 240, 240);
   --dark-green-color: rgb(20, 80, 40);
+  --grey-color: rgb(90, 110, 100);
 }
 
 body {
