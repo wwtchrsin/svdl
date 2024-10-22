@@ -83,7 +83,7 @@
   .files-container {
     max-height: 140px;
     height: 140px;
-    overflow-y: scroll;
+    overflow: hidden;
     background-color: var(--blue-color);
     color: var(--white-color);
   }
@@ -99,7 +99,7 @@
     font-size: 0.9rem;
     max-height: 100%;
     height: 100%;
-    overflow-y: scroll;
+    overflow-y: auto;
     scroll-snap-type: y mandatory;
   }
   .file-container {
